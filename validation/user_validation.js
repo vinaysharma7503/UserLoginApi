@@ -25,7 +25,7 @@ exports.user_register = ((req, res) => {
                     }
                 })
         }),
-        body('phone', 'Phone No is Required').isNumeric()
+        body('phone', 'Phone No is Required').isMobilePhone()
         .custom((result, { req }) => {
             return user_Data.findOne({ phone: result })
                 .then(user => {
@@ -36,19 +36,23 @@ exports.user_register = ((req, res) => {
                     }
                 })
         }),
-        check('password', 'Password is Required').isAlphanumeric()
-        .isLength({
-            min: 8,
-            max: 12
-        }).withMessage(
-            'Password must be greather then 8 characters and less then 12 characters'
-        )
+        check('password', 'Password is Required').isLength({ min: 8 })
+        .withMessage('Password Must Be at Least 8 Characters')
+        .matches('[0-9]').withMessage('Password Must Contain a Number')
+        .matches('[A-Z]').withMessage('Password Must Contain an Uppercase Letter')
+        .matches('[a-z]').withMessage('Password Must Contain an Lowercase Letter')
+        .trim().escape()
     ];
 })
 
 exports.user_login = (req, res) => {
     return [
-        body('password', 'password is Required').isAlphanumeric()
+        check('password', 'Password is Required').isLength({ min: 8 })
+        .withMessage('Password Must Be at Least 8 Characters')
+        .matches('[0-9]').withMessage('Password Must Contain a Number')
+        .matches('[A-Z]').withMessage('Password Must Contain an Uppercase Letter')
+        .matches('[a-z]').withMessage('Password Must Contain an Lowercase Letter')
+        .trim().escape()
         .custom((result, { req }) => {
             const userObj = req.body;
             return user_Data.findOne({ $or: [{ email: userObj.email }, { username: userObj.username }, { phone: userObj.phone }] })
